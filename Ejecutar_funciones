@@ -1,0 +1,9 @@
+--Ejecutar función para insertar clientes
+SELECT public.insert_customer(
+	3:: smallint, 
+	'Dina':: character varying,
+	'Castro':: character varying, 
+	'dicastro@g.com':: character varying, 
+	4:: smallint, 
+	1
+)

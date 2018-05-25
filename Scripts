@@ -1,0 +1,27 @@
+-- FUNCTION: public.insert_customer(smallint, character varying, character varying, character varying, smallint, integer)
+
+-- DROP FUNCTION public.insert_customer(smallint, character varying, character varying, character varying, smallint, integer);
+
+CREATE OR REPLACE FUNCTION public.insert_customer(
+	store_ids smallint,
+	first_names character varying,
+	last_names character varying,
+	emails character varying,
+	address_ids smallint,
+	actives integer)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+ BEGIN
+ INSERT INTO public.customer(store_id, first_name, last_name, email, address_id,active)
+	VALUES (store_ids, first_names, last_names, emails, address_ids,actives);
+END;
+
+$BODY$;
+
+ALTER FUNCTION public.insert_customer(smallint, character varying, character varying, character varying, smallint, integer)
+    OWNER TO postgres;
