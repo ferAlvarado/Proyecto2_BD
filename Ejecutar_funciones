@@ -26,3 +26,12 @@ SELECT public.insert_rental(
 )
 --Prueba de que inserta correctamente
 Select * from RENTAL WHERE customer_id=603;
+
+--Registrar una devolución
+SELECT public.register_return(
+	'Ricardo':: character varying, 
+	'Vargas':: character varying, 
+	1
+)
+--Prueba de que registra una devolución correctamente
+Select * from RENTAL WHERE customer_id=603;

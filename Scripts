@@ -50,3 +50,29 @@ INSERT INTO public.rental(rental_date, inventory_id, customer_id, staff_id)
 END;
 
 $BODY$;
+
+-- FUNCTION: public.register_return(character varying, character varying)
+
+-- DROP FUNCTION public.register_return(character varying, character varying);
+
+CREATE OR REPLACE FUNCTION public.register_return(
+	first_names character varying,
+	last_names character varying,
+	inventory_ids integer)
+	
+    RETURNS void
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+ BEGIN
+UPDATE public.rental
+	SET return_date=now():: timestamp without time zone,last_update=now():: timestamp without time zone
+	WHERE rental.customer_id=(SELECT customer_id FROM CUSTOMER 
+							WHERE CUSTOMER.first_name=first_names AND CUSTOMER.last_name=last_names)
+							AND rental.inventory_id=inventory_ids;
+END;
+
+$BODY$;
