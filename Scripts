@@ -7,8 +7,13 @@ CREATE OR REPLACE FUNCTION public.insert_customer(
 	first_names character varying,
 	last_names character varying,
 	emails character varying,
-	address_ids smallint,
-	actives integer)
+	actives integer,
+	address01 character varying(50),
+    address02 character varying(50),
+    districts character varying(20),
+    city_ids smallint,
+    postal_codes character varying(10),
+    phones character varying(20))
     RETURNS void
     LANGUAGE 'plpgsql'
 
@@ -17,11 +22,11 @@ CREATE OR REPLACE FUNCTION public.insert_customer(
 AS $BODY$
 
  BEGIN
- INSERT INTO public.customer(store_id, first_name, last_name, email, address_id,active)
-	VALUES (store_ids, first_names, last_names, emails, address_ids,actives);
+ INSERT INTO public.address(address, address2, district, city_id, postal_code, phone)
+	VALUES (address01, address02, districts, city_ids, postal_codes, phones);
+ INSERT INTO public.customer(store_id, first_name, last_name, email,address_id,active)
+	VALUES (store_ids, first_names, last_names, emails, (SELECT address_id FROM ADDRESS ORDER By address_id DESC LIMIT 1),actives);
 END;
-
 $BODY$;
 
-ALTER FUNCTION public.insert_customer(smallint, character varying, character varying, character varying, smallint, integer)
-    OWNER TO postgres;
+
