@@ -29,4 +29,24 @@ AS $BODY$
 END;
 $BODY$;
 
+-- FUNCTION: public.insert_rental(integer, smallint, smallint)
 
+-- DROP FUNCTION public.insert_rental(integer, smallint, smallint);
+
+CREATE OR REPLACE FUNCTION public.insert_rental(
+	inventory_ids integer,
+	customer_ids smallint,
+	staff_ids smallint)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+ BEGIN
+INSERT INTO public.rental(rental_date, inventory_id, customer_id, staff_id)
+	VALUES (now():: timestamp without time zone, inventory_ids, customer_ids, staff_ids);
+END;
+
+$BODY$;

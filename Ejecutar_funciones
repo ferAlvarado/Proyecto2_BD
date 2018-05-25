@@ -17,3 +17,12 @@ SELECT c.customer_id, c.store_id,c.first_name,c.last_name,c.email,a.address,a.ad
 FROM CUSTOMER c INNER JOIN (ADDRESS a INNER JOIN (CITY ci INNER JOIN COUNTRY co ON ci.country_id=co.country_id)
 							ON a.city_id=ci.city_id) ON c.address_id=a.address_id
 							WHERE c.first_name='Ricardo';
+							
+--Función que inserta alquileres
+SELECT public.insert_rental(
+	1, 
+	603:: smallint, 
+	1:: smallint
+)
+--Prueba de que inserta correctamente
+Select * from RENTAL WHERE customer_id=603;
