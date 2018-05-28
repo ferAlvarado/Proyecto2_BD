@@ -78,12 +78,6 @@ END;
 
 $BODY$;
 
-
-<<<<<<< HEAD
-
-	
-=======
-
 CREATE OR REPLACE FUNCTION public.insert_movie(
 	movie character varying(255),
     descriptions text,
@@ -327,5 +321,3 @@ ALTER FUNCTION last_day OWNER TO video;
 ALTER FUNCTION register_return OWNER TO video;
 ALTER FUNCTION rewards_report OWNER TO video;
 
-
->>>>>>> a0bbbfae5c413751dcff8f3db26b83a6a09801fa
