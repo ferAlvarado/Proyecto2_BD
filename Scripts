@@ -33,6 +33,7 @@ $BODY$;
 
 -- DROP FUNCTION public.insert_rental(integer, smallint, smallint);
 
+--FALTA VERIFICAR QUE EL CODIGO DE LA PELOCULA QUE SE VA A RENTAR NO ESTE RENTADA
 CREATE OR REPLACE FUNCTION public.insert_rental(
 	inventory_ids integer,
 	customer_ids smallint,
@@ -76,3 +77,119 @@ UPDATE public.rental
 END;
 
 $BODY$;
+
+
+CREATE OR REPLACE FUNCTION public.insert_movie(
+	movie character varying(255),
+    descriptions text,
+    release_years year,
+    language  character varying(20),
+    rental_durations smallint,
+    rental_rates numeric(4,2),
+    lengths smallint,
+    replacement_costs numeric(5,2),
+    ratings mpaa_rating,
+    specials_features text[],
+    fulltexts tsvector,
+	copies_number integer,
+	store_ids integer)
+
+    RETURNS void
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+BEGIN
+ IF (rental_durations=0 AND rental_rates=0 AND replacement_costs=0 AND ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id, length,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name), lengths, specials_features, fulltext);
+ ELSIF (rental_rates=0 AND replacement_costs=0 AND ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration, length,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations, lengths, specials_features, fulltext);
+ELSIF (rental_durations=0  AND replacement_costs=0 AND ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_rate, length,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_rates, lengths, specials_features, fulltext);
+ ELSIF (rental_durations=0 AND rental_rates=0 AND ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id, length,replacement_cost,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name), lengths,replacement_costs, specials_features, fulltext);
+ ELSIF (rental_durations=0 AND rental_rates=0 AND replacement_costs=0) THEN
+	INSERT INTO public.film(title, description, release_year,language_id, length,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name), lengths,ratings, specials_features, fulltext);
+ ELSIF (replacement_costs=0 AND ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration,rental_rate, length,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations,rental_rates, lengths, specials_features, fulltext);
+ ELSIF (rental_rates=0 AND ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration, length,replacement_cost,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations, lengths,replacement_costs, specials_features, fulltext);
+ ELSIF (rental_rates=0 AND replacement_costs=0) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration, length,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations, lengths,ratings, specials_features, fulltext);
+ ELSIF (rental_durations=0 AND ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_rate, length,replacement_cost,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_rates, lengths,replacement_costs, specials_features, fulltext);
+ ELSIF (rental_durations=0 AND replacement_costs=0) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_rate, length,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_rates, lengths,ratings, specials_features, fulltext);
+ ELSIF (rental_durations=0 AND rental_rates=0) THEN
+	INSERT INTO public.film(title, description, release_year,language_id, length,replacement_cost,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),lengths,replacement_costs,ratings, specials_features, fulltext);
+ ELSIF (rental_durations=0 ) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_rate, length,replacement_cost,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_rates,lengths,replacement_costs,ratings, specials_features, fulltext);
+ ELSIF (rental_rates=0 ) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration, length,replacement_cost,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations,lengths,replacement_costs,ratings, specials_features, fulltext);
+ ELSIF (replacement_costs=0 ) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration,rental_rate, length,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations,rental_rates,lengths,ratings, specials_features, fulltext);
+ ELSIF (ratings=''::mpaa_rating) THEN
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration,rental_rate, length,replacement_cost,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations,rental_rates,lengths,replacement_costs, specials_features, fulltext);
+ ELSE
+	INSERT INTO public.film(title, description, release_year,language_id,rental_duration,rental_rate, length,replacement_cost,rating,special_features, fulltext)
+	VALUES (movie, descriptions, release_years, (SELECT language_id 
+					  FROM LANGUAGE 
+					  WHERE language=name),rental_durations,rental_rates,lengths,replacement_costs,ratings, specials_features, fulltext);
+ END IF;	
+ FOR i IN 1..copies_number LOOP
+	INSERT INTO public.inventory(film_id, store_id)
+	VALUES ((SELECT film_id
+			 FROM FILM 
+			WHERE movie=title), store_ids);
+	
+ END LOOP;
+END;
+$BODY$;
+	
