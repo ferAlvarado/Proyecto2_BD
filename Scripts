@@ -1,3 +1,70 @@
+
+-- Creacion de roles
+
+-- Role: "EMP"
+-- DROP ROLE "EMP";
+
+CREATE ROLE "EMP" WITH
+  NOLOGIN
+  NOSUPERUSER
+  INHERIT
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION;
+  
+-- Role: "ADMIN"
+-- DROP ROLE "ADMIN";
+
+CREATE ROLE "ADMIN" WITH
+  NOLOGIN
+  NOSUPERUSER
+  INHERIT
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION;
+
+GRANT "EMP" TO "ADMIN";
+
+-- USER: video
+-- DROP USER video;
+
+CREATE USER video WITH
+  NOLOGIN
+  NOSUPERUSER
+  INHERIT
+  CREATEDB
+  CREATEROLE
+  NOREPLICATION;
+  
+-- User: empleado1
+-- DROP USER empleado1;
+
+CREATE USER empleado1 WITH
+  LOGIN
+  NOSUPERUSER
+  INHERIT
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION
+  PASSWORD '1234';
+
+GRANT "EMP" TO empleado1;
+
+-- User: administrador1
+-- DROP USER administrador1;
+
+CREATE USER administrador1 WITH
+  LOGIN
+  NOSUPERUSER
+  INHERIT
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION
+  PASSWORD '1234';
+
+GRANT "ADMIN" TO administrador1;
+
+
 -- FUNCTION: public.insert_customer(smallint, character varying, character varying, character varying, smallint, integer)
 
 -- DROP FUNCTION public.insert_customer(smallint, character varying, character varying, character varying, smallint, integer);
@@ -219,71 +286,6 @@ $BODY$;
 
 ALTER FUNCTION public.insert_inventory(integer, smallint, smallint, timestamp without time zone)
     OWNER TO video;
-
--- Creacion de roles
-
--- Role: "EMP"
--- DROP ROLE "EMP";
-
-CREATE ROLE "EMP" WITH
-  NOLOGIN
-  NOSUPERUSER
-  INHERIT
-  NOCREATEDB
-  NOCREATEROLE
-  NOREPLICATION;
-  
--- Role: "ADMIN"
--- DROP ROLE "ADMIN";
-
-CREATE ROLE "ADMIN" WITH
-  NOLOGIN
-  NOSUPERUSER
-  INHERIT
-  NOCREATEDB
-  NOCREATEROLE
-  NOREPLICATION;
-
-GRANT "EMP" TO "ADMIN";
-
--- USER: video
--- DROP USER video;
-
-CREATE USER video WITH
-  NOLOGIN
-  NOSUPERUSER
-  INHERIT
-  CREATEDB
-  CREATEROLE
-  NOREPLICATION;
-  
--- User: empleado1
--- DROP USER empleado1;
-
-CREATE USER empleado1 WITH
-  LOGIN
-  NOSUPERUSER
-  INHERIT
-  NOCREATEDB
-  NOCREATEROLE
-  NOREPLICATION
-  PASSWORD '1234';
-
-GRANT "EMP" TO empleado1;
-
--- User: administrador1
--- DROP USER administrador1;
-
-CREATE USER administrador1 WITH
-  LOGIN
-  NOSUPERUSER
-  INHERIT
-  NOCREATEDB
-  NOCREATEROLE
-  NOREPLICATION
-  PASSWORD '1234';
-
-GRANT "ADMIN" TO administrador1;
 
 -- Asignacion de permisos 
 GRANT EXECUTE ON FUNCTION insert_customer,insert_rental,register_return,film_in_stock TO "EMP";

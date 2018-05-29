@@ -1,0 +1,15 @@
+==================EN DB FUENTE
+CREATE ROLE replicator REPLICATION LOGIN PASSWORD '1234';
+
+CREATE PUBLICATION bpub FOR TABLE actor,address,category,city,country,customer,film,film_actor,film_category,inventory,language,payment,rental,staff,store;
+
+GRANT ALL ON actor,address,category,city,country,customer,film,film_actor,film_category,inventory,language,payment,rental,staff,store TO replicator;
+
+
+==================EN DB DESTINO
+
+CREATE SUBSCRIPTION bsub
+CONNECTION 'dbname=peliculas host=localhost
+port=5433 user=replicator
+password=1234'
+PUBLICATION bpub;
