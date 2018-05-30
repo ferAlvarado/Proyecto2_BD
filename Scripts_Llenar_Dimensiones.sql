@@ -20,15 +20,50 @@ END;
 $BODY$;
 
  INSERT INTO DIMENSION_FECHA
-	SELECT extract(DAY FROM rental_date), extract(MONTH FROM rental_date), extract(YEAR FROM rental_date) 
+	SELECT extract(YEAR FROM rental_date) AS YEAR, extract(MONTH FROM rental_date) AS MONTH , extract(DAY FROM rental_date) AS DAY
 	FROM RENTAL
-	GROUP BY  extract(YEAR FROM renta_date), extract(MONTH FROM renta_date), extract(DAY FROM renta_date)
+	GROUP BY (YEAR, MONTH, DAY)
+	ORDER BY YEAR, MONTH, DAY;
+
 	
 INSERT INTO DIMENSION_lUGAR
-	SELECT CITY.city, COUNTRY.country, STORE.store_id
+	SELECT c.city, co.country, st.store_id
 	FROM RENTAL r INNER JOIN STAFF s ON r.staff_id=s.staff_id
 		 INNER JOIN STORE st ON s.store_id=st.store_id
 		 INNER JOIN ADDRESS a ON st.address_id=a.address_id
 		 INNER JOIN CITY c  ON a.city_id=c.city_id
 		 INNER JOIN COUNTRY co ON co.country_id=c.country_id
-	GROUP BY CITY.city, COUNTRY.country, STORE.store_id
+	GROUP BY  ( c.city, co.country, st.store_id)
+	
+INSERT INTO DIMENSION_LENGUAJE
+	SELECT LANGUAGE.name
+	FROM LANGUAGE
+	
+INSERT INTO DIMENSION_DURACION
+	select extract(DAY FROM (RENTAL.return_date - RENTAL.rental_date)) AS DAY from rental
+	group by DAY
+	ORDER BY DAY;
+	
+INSERT INTO HECHOS_ALQUILER
+	SELECT 	DIMENSION_PELICULA.id, DIMENSION_lUGAR.id, DIMENSION_LENGUAJE.id, DIMENSION_FECHA.id, count(*), SUM(PAYMENT.amount)
+	FROM RENTAL r, STAFF s, STORE st,ADDRESS a, CITY c, COUNTRY co
+	WHERE r.staff_id=s.staff_id AND s.store_id=st.store_id AND st.address_id=a.address_id AND a.city_id=c.city_id AND co.country_id=c.country_id
+		 
+		 
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	INNER JOIN payment p ON r.rental_id = p.rental_id
+	
+	
+	
+	
+	
+	
+	
