@@ -1,5 +1,5 @@
 -- No sé como se llama la tabla jaja
-CREATE OR REPLACE FUNCTION public.insert_customer
+CREATE OR REPLACE FUNCTION DIMENSION_PELICULA
     RETURNS void
     LANGUAGE 'plpgsql'
 
