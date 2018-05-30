@@ -1,0 +1,18 @@
+-- No sé como se llama la tabla jaja
+CREATE OR REPLACE FUNCTION public.insert_customer
+    RETURNS void
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
+ BEGIN
+ INSERT INTO DIMENSION_PELICULA 
+	SELECT category.name  film.title
+	FROM CATEGORY c INNER JOIN FILM_CATEGORY fc ON c.category_id=fc.category_id
+		 INNER JOIN FILM f ON f.film_id=fc.film_id
+		 INNER JOIN INVENTORY i ON i.film_id=f.film_id
+		 INNER JOIN RENTAL r ON i.inventory_id=r.inventory_id
+END;
+$BODY$;
