@@ -1,3 +1,74 @@
+--CREAR MODELO ESTRELLA
+CREATE TABLE DIMENSION_PELICULA 
+(
+    pelicula_id integer NOT NULL DEFAULT nextval('DIMENSION_PELICULA_pelicula_id_seq'::regclass),
+    categoria character varying(25) NOT NULL,
+    pelicula character varying(255) NOT NULL,
+    CONSTRAINT pelicula_pkey PRIMARY KEY (pelicula_id)
+);
+
+CREATE TABLE DIMENSION_FECHA 
+(
+    fecha_id integer NOT NULL DEFAULT nextval('DIMENSION_FECHA_fecha_id_seq'::regclass),
+	anno date NOT NULL,  -
+	mes date NOT NULL,
+	dia date NOT NULL,
+    CONSTRAINT fecha_pkey PRIMARY KEY (fecha_id)
+);
+
+CREATE TABLE DIMENSION_LUGAR 
+(
+    lugar_id integer NOT NULL DEFAULT nextval('DIMENSION_LUGAR_lugar_id_seq'::regclass),
+    pais character varying(50) NOT NULL,
+    ciudad character varying(50) NOT NULL,
+	tienda integer NOT NULL,
+    CONSTRAINT lugar_pkey PRIMARY KEY (lugar_id)
+);
+
+CREATE TABLE DIMENSION_LENGUAJE 
+(
+    lenguaje_id integer NOT NULL DEFAULT nextval('DIMENSION_LENGUAJE_lenguaje_id_seq'::regclass),
+	lenguaje character(20) NOT NULL,  
+    CONSTRAINT fecha_pkey PRIMARY KEY (fecha_id)
+);
+
+CREATE TABLE DIMENSION_DURACION
+(
+    duracion_id integer NOT NULL DEFAULT nextval('DIMENSION_LUGAR_lugar_id_seq'::regclass),
+    cantidad integer NOT NULL,
+    CONSTRAINT duracion_pkey PRIMARY KEY (duracion_id)
+);
+
+CREATE TABLE HECHOS_ALQUILER 
+(
+	pelicula_id integer NOT NULL,
+	fecha_id integer NOT NULL,
+	lugar_id integer NOT NULL,
+    lenguaje_id integer NOT NULL,
+	duracion_id integer NOT NULL,
+	numeroAlquileres integer NOT NULL,
+	montoAlquileres numeric(5,2) NOT NULL
+	CONSTRAINT pelicula_id_fkey FOREIGN KEY (pelicula_id)
+        REFERENCES DIMENSION_PELICULA (pelicula_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+	CONSTRAINT fecha_id_fkey FOREIGN KEY (fecha_id)
+        REFERENCES DIMENSION_FECHA (fecha_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+	CONSTRAINT lugar_id_fkey FOREIGN KEY (lugar_id)
+        REFERENCES DIMENSION_LUGAR (lugar_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+	CONSTRAINT lenguaje_id_fkey FOREIGN KEY (lenguaje_id)
+        REFERENCES DIMENSION_LENGUAJE (lenguaje_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+	CONSTRAINT duracion_id_fkey FOREIGN KEY (duracion_id)
+        REFERENCES DIMENSION_DURACION (duracion_id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
 -- No sé como se llama la tabla jaja
 CREATE OR REPLACE FUNCTION MODELO_ESTRELLA
     RETURNS void
@@ -52,78 +123,6 @@ END;
 $BODY$;
 
  
-	
---CREAR MODELO ESTRELLA
-CREATE TABLE DIMENSION_PELICULA 
-(
-    pelicula_id integer NOT NULL DEFAULT nextval('DIMENSION_PELICULA_pelicula_id_seq'::regclass),
-    categoria character varying(25) NOT NULL,
-    pelicula character varying(255) NOT NULL,
-    CONSTRAINT pelicula_pkey PRIMARY KEY (pelicula_id)
-)
-
-CREATE TABLE DIMENSION_FECHA 
-(
-    fecha_id integer NOT NULL DEFAULT nextval('DIMENSION_FECHA_fecha_id_seq'::regclass),
-	anno date NOT NULL,  -
-	mes date NOT NULL,
-	dia date NOT NULL,
-    CONSTRAINT fecha_pkey PRIMARY KEY (fecha_id)
-)
-
-CREATE TABLE DIMENSION_LUGAR 
-(
-    lugar_id integer NOT NULL DEFAULT nextval('DIMENSION_LUGAR_lugar_id_seq'::regclass),
-    pais character varying(50) NOT NULL,
-    ciudad character varying(50) NOT NULL,
-	tienda integer NOT NULL,
-    CONSTRAINT lugar_pkey PRIMARY KEY (lugar_id)
-)
-
-CREATE TABLE DIMENSION_LENGUAJE 
-(
-    lenguaje_id integer NOT NULL DEFAULT nextval('DIMENSION_LENGUAJE_lenguaje_id_seq'::regclass),
-	lenguaje character(20) NOT NULL,  
-    CONSTRAINT fecha_pkey PRIMARY KEY (fecha_id)
-)
-
-CREATE TABLE DIMENSION_DURACION
-(
-    duracion_id integer NOT NULL DEFAULT nextval('DIMENSION_LUGAR_lugar_id_seq'::regclass),
-    cantidad integer NOT NULL,
-    CONSTRAINT duracion_pkey PRIMARY KEY (duracion_id)
-)
-
-CREATE TABLE HECHOS_ALQUILER 
-(
-	pelicula_id integer NOT NULL,
-	fecha_id integer NOT NULL,
-	lugar_id integer NOT NULL,
-    lenguaje_id integer NOT NULL,
-	duracion_id integer NOT NULL,
-	numeroAlquileres integer NOT NULL,
-	montoAlquileres numeric(5,2) NOT NULL
-	CONSTRAINT pelicula_id_fkey FOREIGN KEY (pelicula_id)
-        REFERENCES DIMENSION_PELICULA (pelicula_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT fecha_id_fkey FOREIGN KEY (fecha_id)
-        REFERENCES DIMENSION_FECHA (fecha_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT lugar_id_fkey FOREIGN KEY (lugar_id)
-        REFERENCES DIMENSION_LUGAR (lugar_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT lenguaje_id_fkey FOREIGN KEY (lenguaje_id)
-        REFERENCES DIMENSION_LENGUAJE (lenguaje_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT duracion_id_fkey FOREIGN KEY (duracion_id)
-        REFERENCES DIMENSION_DURACION (duracion_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT
-)
 
 
 --CONSULTAS DEL MODELO
