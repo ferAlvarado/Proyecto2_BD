@@ -39,6 +39,7 @@ INSERT INTO DIMENSION_LENGUAJE
 INSERT INTO DIMENSION_DURACION
 	select (date_part ('day',  return_date - rental_date )) +
         ceiling(date_part ('hour', return_date - rental_date ) /24) AS DAY from rental
+	where return_date is not null
 	group by DAY
 	ORDER BY DAY;
 	
