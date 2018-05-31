@@ -134,10 +134,10 @@ $BODY$
 DECLARE 
   ret RECORD;
 BEGIN
-  SELECT h.numeroAlquileres 
+  SELECT h.numeroAlquileres,p.categoria 
   FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_PELICULA p  ON h.pelicula_id=p.pelicula_id 
   WHERE p.categoria=categoria 
-  GROUP BY p.categoria INTO ret;
+  GROUP BY p.categoria,h.numeroAlquileres INTO ret;
 RETURN ret;
 END;
 $BODY$ 
@@ -152,10 +152,41 @@ $BODY$
 DECLARE 
   ret RECORD;
 BEGIN
-  SELECT h.numeroAlquileres,h.montoAlquileres
+  SELECT h.numeroAlquileres,h.montoAlquileres,d.cantidad
   FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_DURACION d  ON h.duracion_id=d.duracion_id 
-  WHERE p.categoria=categoria 
-  GROUP BY d.cantidad INTO ret;
+  GROUP BY d.cantidad,h.numeroAlquileres,h.montoAlquileres INTO ret;
+RETURN ret;
+END;
+$BODY$ 
+LANGUAGE plpgsql;
+
+
+LANGUAGE plpgsql VOLATILE 
+
+CREATE FUNCTION rollup_anno_mes()
+RETURNS RECORD AS 
+$BODY$
+DECLARE 
+  ret RECORD;
+BEGIN
+  SELECT h.montoAlquileres,f.anno,f.mes
+  FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_FECHA f  ON h.fecha_id=f.fecha_id 
+  GROUP BY ROLLUP (f.anno,f.mes,h.montoAlquileres) INTO ret;
+RETURN ret;
+END;
+$BODY$ 
+LANGUAGE plpgsql;
+
+CREATE FUNCTION cubo_anno_categoria()
+RETURNS RECORD AS 
+$BODY$
+DECLARE 
+  ret RECORD;
+BEGIN
+  SELECT h.numeroAlquileres,h.montoAlquileres,f.anno,p.categoria
+  FROM HECHOS_ALQUILER h,DIMENSION_FECHA f, DIMENSION_PELICULA p
+  WHERE h.fecha_id=f.fecha_id AND h.pelicula_id=p.pelicula_id
+  GROUP BY ROLLUP (f.anno,p.categoria,h.numeroAlquileres,h.montoAlquileres) INTO ret;
 RETURN ret;
 END;
 $BODY$ 
