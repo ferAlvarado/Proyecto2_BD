@@ -1,42 +1,37 @@
 --CREAR MODELO ESTRELLA
 CREATE TABLE DIMENSION_PELICULA 
 (
-    pelicula_id integer NOT NULL DEFAULT nextval('DIMENSION_PELICULA_pelicula_id_seq'::regclass),
+    pelicula_id SERIAL NOT NULL PRIMARY KEY,
     categoria character varying(25) NOT NULL,
-    pelicula character varying(255) NOT NULL,
-    CONSTRAINT pelicula_pkey PRIMARY KEY (pelicula_id)
+    pelicula character varying(255) NOT NULL
 );
 
 CREATE TABLE DIMENSION_FECHA 
 (
-    fecha_id integer NOT NULL DEFAULT nextval('DIMENSION_FECHA_fecha_id_seq'::regclass),
-	anno date NOT NULL,  -
+    fecha_id SERIAL NOT NULL PRIMARY KEY,
+	anno date NOT NULL,  
 	mes date NOT NULL,
-	dia date NOT NULL,
-    CONSTRAINT fecha_pkey PRIMARY KEY (fecha_id)
+	dia date NOT NULL
 );
 
 CREATE TABLE DIMENSION_LUGAR 
 (
-    lugar_id integer NOT NULL DEFAULT nextval('DIMENSION_LUGAR_lugar_id_seq'::regclass),
+    lugar_id SERIAL NOT NULL PRIMARY KEY,
     pais character varying(50) NOT NULL,
     ciudad character varying(50) NOT NULL,
-	tienda integer NOT NULL,
-    CONSTRAINT lugar_pkey PRIMARY KEY (lugar_id)
+	tienda integer NOT NULL
 );
 
 CREATE TABLE DIMENSION_LENGUAJE 
 (
-    lenguaje_id integer NOT NULL DEFAULT nextval('DIMENSION_LENGUAJE_lenguaje_id_seq'::regclass),
-	lenguaje character(20) NOT NULL,  
-    CONSTRAINT fecha_pkey PRIMARY KEY (fecha_id)
+    lenguaje_id SERIAL NOT NULL PRIMARY KEY,
+	lenguaje character(20) NOT NULL
 );
 
 CREATE TABLE DIMENSION_DURACION
 (
-    duracion_id integer NOT NULL DEFAULT nextval('DIMENSION_LUGAR_lugar_id_seq'::regclass),
-    cantidad integer NOT NULL,
-    CONSTRAINT duracion_pkey PRIMARY KEY (duracion_id)
+    duracion_id SERIAL NOT NULL PRIMARY KEY,
+    cantidad integer NOT NULL
 );
 
 CREATE TABLE HECHOS_ALQUILER 
