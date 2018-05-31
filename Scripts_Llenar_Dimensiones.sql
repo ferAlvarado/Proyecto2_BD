@@ -45,7 +45,7 @@ CREATE TABLE HECHOS_ALQUILER
 	montoAlquileres numeric(5,2) 
 );
 -- No sé como se llama la tabla jaja
-CREATE OR REPLACE FUNCTION MODELO_ESTRELLA
+CREATE OR REPLACE FUNCTION MODELO_ESTRELLA()
     RETURNS void
     LANGUAGE 'plpgsql'
 
@@ -60,7 +60,7 @@ AS $BODY$
 		 INNER JOIN FILM f ON f.film_id=fc.film_id
 		 INNER JOIN INVENTORY i ON i.film_id=f.film_id
 		 INNER JOIN RENTAL r ON i.inventory_id=r.inventory_id
-		GROUP BY c.name, f.title
+		GROUP BY c.name, f.title;
 		
 INSERT INTO DIMENSION_FECHA (anno, mes, dia)
 SELECT extract(YEAR FROM rental_date) AS YEAR, extract(MONTH FROM rental_date) AS MONTH , extract(DAY FROM rental_date) AS DAY
@@ -76,12 +76,12 @@ INSERT INTO DIMENSION_LUGAR (pais, ciudad, tienda)
 		 INNER JOIN ADDRESS a ON st.address_id=a.address_id
 		 INNER JOIN CITY c  ON a.city_id=c.city_id
 		 INNER JOIN COUNTRY co ON co.country_id=c.country_id
-	GROUP BY  ( c.city, co.country, st.store_id)
+	GROUP BY  ( c.city, co.country, st.store_id);
 	
 
 INSERT INTO DIMENSION_LENGUAJE (lenguaje)
 	SELECT LANGUAGE.name
-	FROM LANGUAGE
+	FROM LANGUAGE;
 	
 INSERT INTO DIMENSION_DURACION (cantidad)
 	select (date_part ('day',  return_date - rental_date )) +
@@ -125,22 +125,13 @@ INSERT INTO HECHOS_ALQUILER
 	AND DIMENSION_FECHA.mes = extract(MONTH FROM r.rental_date)
 	AND DIMENSION_FECHA.dia = extract(DAY FROM r.rental_date)
 	AND DIMENSION_DURACION.cantidad = (date_part ('day',  r.return_date - r.rental_date )) + ceiling(date_part ('hour', r.return_date - r.rental_date ) /24)
-	GROUP BY DIMENSION_PELICULA.pelicula_id, DIMENSION_FECHA.fecha_id, DIMENSION_lUGAR.lugar_id, DIMENSION_LENGUAJE.lenguaje_id, DIMENSION_DURACION.duracion_id
-
-
-
-
-
-
-	 
-
+	GROUP BY DIMENSION_PELICULA.pelicula_id, DIMENSION_FECHA.fecha_id, DIMENSION_lUGAR.lugar_id, DIMENSION_LENGUAJE.lenguaje_id, DIMENSION_DURACION.duracion_id;
 
 
 	  
 END;
 $BODY$;
 
- 
 
 
 --CONSULTAS DEL MODELO
