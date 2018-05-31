@@ -9,9 +9,9 @@ CREATE TABLE DIMENSION_PELICULA
 CREATE TABLE DIMENSION_FECHA 
 (
     fecha_id SERIAL NOT NULL PRIMARY KEY,
-	anno date NOT NULL,  
-	mes date NOT NULL,
-	dia date NOT NULL
+	anno int NOT NULL,  
+	mes int NOT NULL,
+	dia int NOT NULL
 );
 
 CREATE TABLE DIMENSION_LUGAR 
@@ -36,33 +36,13 @@ CREATE TABLE DIMENSION_DURACION
 
 CREATE TABLE HECHOS_ALQUILER 
 (
-	pelicula_id integer NOT NULL,
-	fecha_id integer NOT NULL,
-	lugar_id integer NOT NULL,
-    lenguaje_id integer NOT NULL,
-	duracion_id integer NOT NULL,
+	pelicula_id integer NOT NULL REFERENCES DIMENSION_PELICULA(pelicula_id),
+	fecha_id integer NOT NULL REFERENCES DIMENSION_FECHA(fecha_id),
+	lugar_id integer NOT NULL REFERENCES DIMENSION_LUGAR(lugar_id),
+    lenguaje_id integer NOT NULL REFERENCES DIMENSION_LENGUAJE(lenguaje_id),
+	duracion_id integer NOT NULL REFERENCES DIMENSION_DURACION(duracion_id),
 	numeroAlquileres integer NOT NULL,
-	montoAlquileres numeric(5,2) NOT NULL
-	CONSTRAINT pelicula_id_fkey FOREIGN KEY (pelicula_id)
-        REFERENCES DIMENSION_PELICULA (pelicula_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT fecha_id_fkey FOREIGN KEY (fecha_id)
-        REFERENCES DIMENSION_FECHA (fecha_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT lugar_id_fkey FOREIGN KEY (lugar_id)
-        REFERENCES DIMENSION_LUGAR (lugar_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT lenguaje_id_fkey FOREIGN KEY (lenguaje_id)
-        REFERENCES DIMENSION_LENGUAJE (lenguaje_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT,
-	CONSTRAINT duracion_id_fkey FOREIGN KEY (duracion_id)
-        REFERENCES DIMENSION_DURACION (duracion_id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE RESTRICT
+	montoAlquileres numeric(5,2) 
 );
 -- No sé como se llama la tabla jaja
 CREATE OR REPLACE FUNCTION MODELO_ESTRELLA
@@ -74,23 +54,23 @@ CREATE OR REPLACE FUNCTION MODELO_ESTRELLA
 AS $BODY$
 
  BEGIN
- INSERT INTO DIMENSION_PELICULA 
-	SELECT category.name  film.title
+ INSERT INTO DIMENSION_PELICULA (categoria, pelicula)
+	SELECT c.name, f.title
 	FROM CATEGORY c INNER JOIN FILM_CATEGORY fc ON c.category_id=fc.category_id
 		 INNER JOIN FILM f ON f.film_id=fc.film_id
 		 INNER JOIN INVENTORY i ON i.film_id=f.film_id
 		 INNER JOIN RENTAL r ON i.inventory_id=r.inventory_id
-		GROUP BY category.name  film.title
+		GROUP BY c.name, f.title
 		
-INSERT INTO DIMENSION_FECHA
-	SELECT extract(YEAR FROM rental_date) AS YEAR, extract(MONTH FROM rental_date) AS MONTH , extract(DAY FROM rental_date) AS DAY
+INSERT INTO DIMENSION_FECHA (anno, mes, dia)
+SELECT extract(YEAR FROM rental_date) AS YEAR, extract(MONTH FROM rental_date) AS MONTH , extract(DAY FROM rental_date) AS DAY
 	FROM RENTAL
 	GROUP BY (YEAR, MONTH, DAY)
 	ORDER BY YEAR, MONTH, DAY;
-
 	
-INSERT INTO DIMENSION_LUGAR
-	SELECT c.city, co.country, st.store_id
+	
+INSERT INTO DIMENSION_LUGAR (pais, ciudad, tienda)
+	SELECT co.country, c.city, st.store_id
 	FROM RENTAL r INNER JOIN STAFF s ON r.staff_id=s.staff_id
 		 INNER JOIN STORE st ON s.store_id=st.store_id
 		 INNER JOIN ADDRESS a ON st.address_id=a.address_id
@@ -98,11 +78,12 @@ INSERT INTO DIMENSION_LUGAR
 		 INNER JOIN COUNTRY co ON co.country_id=c.country_id
 	GROUP BY  ( c.city, co.country, st.store_id)
 	
-INSERT INTO DIMENSION_LENGUAJE
+
+INSERT INTO DIMENSION_LENGUAJE (lenguaje)
 	SELECT LANGUAGE.name
 	FROM LANGUAGE
 	
-INSERT INTO DIMENSION_DURACION
+INSERT INTO DIMENSION_DURACION (cantidad)
 	select (date_part ('day',  return_date - rental_date )) +
         ceiling(date_part ('hour', return_date - rental_date ) /24) AS DAY from rental
 	where return_date is not null
@@ -110,10 +91,52 @@ INSERT INTO DIMENSION_DURACION
 	ORDER BY DAY;
 	
 INSERT INTO HECHOS_ALQUILER
-	SELECT 	DIMENSION_PELICULA.id, DIMENSION_lUGAR.id, DIMENSION_LENGUAJE.id, DIMENSION_FECHA.id, count(*), SUM(PAYMENT.amount)
-	FROM RENTAL r, STAFF s, STORE st,ADDRESS a, CITY c, COUNTRY co
-	WHERE r.staff_id=s.staff_id AND s.store_id=st.store_id AND st.address_id=a.address_id AND a.city_id=c.city_id AND co.country_id=c.country_id
-		 
+	SELECT 	DIMENSION_PELICULA.pelicula_id, DIMENSION_FECHA.fecha_id, DIMENSION_lUGAR.lugar_id, DIMENSION_LENGUAJE.lenguaje_id, DIMENSION_DURACION.duracion_id, count(*), SUM(P.amount)
+	FROM RENTAL r 
+	FULL JOIN PAYMENT P
+	ON r.rental_id = P.rental_id
+	INNER JOIN inventory I
+	ON r.inventory_id = I.inventory_id 
+	INNER JOIN FILM F
+	ON I.film_id = F.film_id
+	INNER JOIN language L
+	ON F.language_id = L.language_id
+	INNER JOIN film_category fc
+	ON fc.film_id = F.film_id
+	INNER JOIN category cat
+	on fc.category_id = cat.category_id
+	INNER JOIN STAFF s   
+	ON r.staff_id=s.staff_id 
+	INNER JOIN STORE st
+	ON s.store_id=st.store_id 
+	INNER JOIN ADDRESS a
+	ON st.address_id=a.address_id 
+	INNER JOIN CITY c
+	ON a.city_id=c.city_id 
+	INNER JOIN COUNTRY co
+	ON co.country_id=c.country_id, DIMENSION_lUGAR, DIMENSION_LENGUAJE, DIMENSION_PELICULA, DIMENSION_FECHA, DIMENSION_DURACION
+	WHERE DIMENSION_LUGAR.pais = co.country 
+	AND DIMENSION_LUGAR.ciudad = c.city 
+	AND DIMENSION_LUGAR.tienda = st.store_id
+	AND L.name = DIMENSION_LENGUAJE.lenguaje
+	AND DIMENSION_PELICULA.pelicula = F.title
+	AND DIMENSION_PELICULA.categoria = cat.name
+	AND DIMENSION_FECHA.anno = extract(YEAR FROM r.rental_date)
+	AND DIMENSION_FECHA.mes = extract(MONTH FROM r.rental_date)
+	AND DIMENSION_FECHA.dia = extract(DAY FROM r.rental_date)
+	AND DIMENSION_DURACION.cantidad = (date_part ('day',  r.return_date - r.rental_date )) + ceiling(date_part ('hour', r.return_date - r.rental_date ) /24)
+	GROUP BY DIMENSION_PELICULA.pelicula_id, DIMENSION_FECHA.fecha_id, DIMENSION_lUGAR.lugar_id, DIMENSION_LENGUAJE.lenguaje_id, DIMENSION_DURACION.duracion_id
+
+
+
+
+
+
+	 
+
+
+
+	  
 END;
 $BODY$;
 
