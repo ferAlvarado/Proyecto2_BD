@@ -124,6 +124,27 @@ CREATE TABLE HECHOS_ALQUILER
 )
 
 
+--CONSULTAS DEL MODELO
+CREATE FUNCTION obtener_num_alquileres_categoria(
+mes date,
+categoria character varying(25)
+)
+RETURNS RECORD AS 
+$BODY$
+DECLARE 
+  ret RECORD;
+BEGIN
+  SELECT h.numeroAlquileres 
+  FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_PELICULA p  ON h.pelicula_id=p.pelicula_id 
+  WHERE p.categoria=categoria 
+  GROUP BY p.categoria INTO ret;
+RETURN ret;
+END;
+$BODY$ 
+LANGUAGE plpgsql;
+
+
+LANGUAGE plpgsql VOLATILE 
 
 	
 	
