@@ -136,25 +136,24 @@ $BODY$;
 
 --CONSULTAS DEL MODELO
 CREATE FUNCTION obtener_num_alquileres_categoria(
-mes date,
-categoria character varying(25)
+mes int
 )
+
 RETURNS RECORD AS 
 $BODY$
 DECLARE 
   ret RECORD;
 BEGIN
-  SELECT h.numeroAlquileres,p.categoria 
+  SELECT f.mes, p.categoria, count(*) as numeroAlquileres
   FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_PELICULA p  ON h.pelicula_id=p.pelicula_id 
+  INNER JOIN DIMENSION_FECHA f ON h.fecha_id = f.fecha_id
   WHERE p.categoria=categoria 
-  GROUP BY p.categoria,h.numeroAlquileres INTO ret;
+  and f.mes = mes
+  GROUP BY f.mes, p.categoria INTO ret;
 RETURN ret;
 END;
-$BODY$ 
-LANGUAGE plpgsql;
+$BODY$  LANGUAGE plpgsql;
 
-
-LANGUAGE plpgsql VOLATILE 
 
 CREATE FUNCTION obtener_num_alquileres_duracion()
 RETURNS RECORD AS 
@@ -162,16 +161,16 @@ $BODY$
 DECLARE 
   ret RECORD;
 BEGIN
-  SELECT h.numeroAlquileres,h.montoAlquileres,d.cantidad
+  SELECT d.cantidad, SUM(numeroalquileres),SUM(montoalquileres)
   FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_DURACION d  ON h.duracion_id=d.duracion_id 
-  GROUP BY d.cantidad,h.numeroAlquileres,h.montoAlquileres INTO ret;
+  GROUP BY d.cantidad
+  ORDER BY cantidad INTO ret;
 RETURN ret;
 END;
 $BODY$ 
 LANGUAGE plpgsql;
 
 
-LANGUAGE plpgsql VOLATILE 
 
 CREATE FUNCTION rollup_anno_mes()
 RETURNS RECORD AS 
@@ -179,9 +178,9 @@ $BODY$
 DECLARE 
   ret RECORD;
 BEGIN
-  SELECT h.montoAlquileres,f.anno,f.mes
+  SELECT f.anno,f.mes,SUM(h.montoAlquileres)
   FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_FECHA f  ON h.fecha_id=f.fecha_id 
-  GROUP BY ROLLUP (f.anno,f.mes,h.montoAlquileres) INTO ret;
+  GROUP BY f.anno,f.mes INTO ret;
 RETURN ret;
 END;
 $BODY$ 
@@ -193,17 +192,17 @@ $BODY$
 DECLARE 
   ret RECORD;
 BEGIN
-  SELECT h.numeroAlquileres,h.montoAlquileres,f.anno,p.categoria
-  FROM HECHOS_ALQUILER h,DIMENSION_FECHA f, DIMENSION_PELICULA p
-  WHERE h.fecha_id=f.fecha_id AND h.pelicula_id=p.pelicula_id
-  GROUP BY ROLLUP (f.anno,p.categoria,h.numeroAlquileres,h.montoAlquileres) INTO ret;
+  SELECT f.anno,p.categoria,SUM(h.numeroAlquileres) as num_alquileres,SUM(h.montoAlquileres) as monto
+  FROM HECHOS_ALQUILER h INNER JOIN DIMENSION_FECHA f
+  ON h.fecha_id=f.fecha_id INNER JOIN DIMENSION_PELICULA P
+  ON h.pelicula_id=p.pelicula_id
+  GROUP BY CUBE (f.anno,p.categoria) 
+  ORDER BY f.anno, p.categoria INTO ret;
 RETURN ret;
 END;
 $BODY$ 
 LANGUAGE plpgsql;
 
-
-LANGUAGE plpgsql VOLATILE 
 
 	
 	
